@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.storeroom3.databinding.ItemStoreBinding
 
 class StoreAdapter(
@@ -28,6 +30,12 @@ class StoreAdapter(
 
             binding.tvName.text = store.name
             binding.chbFavorite.isChecked = store.isFavorite
+
+            Glide.with(mContext)
+                .load(store.photoUrl)//esto es para cargar la imagen de la url que le pasamos
+                .diskCacheStrategy(DiskCacheStrategy.ALL)//esto es para que se guarde en cache la imagen
+                .centerCrop()// esto es para que el tamaño de la imagen sea el mismo
+                .into(binding.imgphoto)//esto es para que se muestre la imagen
         }
     }
 
@@ -64,7 +72,7 @@ class StoreAdapter(
 
         fun setlistener (storeEntity : StoreEntity){
             with(binding.root) {
-                setOnClickListener { listener.onClick(storeEntity) }
+                setOnClickListener { listener.onClick(storeEntity.id) }
                 setOnLongClickListener {
                     listener.onDeleteStore(storeEntity)
                     true
