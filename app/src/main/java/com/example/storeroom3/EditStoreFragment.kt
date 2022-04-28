@@ -11,6 +11,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.storeroom3.databinding.FragmentEditStoreBinding
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.textfield.TextInputLayout
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 
@@ -26,7 +27,8 @@ class EditStoreFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle? ): View {
+        savedInstanceState: Bundle?
+    ): View {
         mBinding = FragmentEditStoreBinding.inflate(inflater, container, false)
 
         return mBinding.root
@@ -45,21 +47,42 @@ class EditStoreFragment : Fragment() {
             mStoreEntity = StoreEntity(name = "", phone = "", photoUrl = "")
         }
 
+        setupActionBar()
+        setupTextFields()
+
+    }
+
+    private fun setupActionBar() {
         mActivity = activity as? MainActivity
         mActivity?.supportActionBar?.setDisplayHomeAsUpEnabled(true) //para que aparezca el boton de regresar
         mActivity?.supportActionBar?.title =
-            getString(R.string.edit_stor_title_add) //para que aparezca el titulo de la ActionBar
+                                             if (mIsEditMode) getString(R.string.edit_store_titele_edit)
+                                             else getString(R.string.edit_stor_title_add) //para que aparezca el titulo de la ActionBar
 
         setHasOptionsMenu(true) //para que aparezca el menu de opciones
+    }
 
-        mBinding.etPhotoUrl.addTextChangedListener {
-            Glide.with(this)
-                .load(mBinding.etPhotoUrl.text.toString())
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .centerCrop()
-                .into(mBinding.imgphoto)
+    private fun setupTextFields() {
+        //para que cuando se escriba en el campo de texto se actualice la imagen en el ImageView
+        //y deje de verse en color rojo y se vea el texto escrito
+        with(mBinding) {
+            etName.addTextChangedListener { validateFields(mBinding.tilName) }
+            etPhone.addTextChangedListener { validateFields(mBinding.tilPhone) }
+            etPhotoUrl.addTextChangedListener {
+                validateFields(mBinding.tilPhotoUrl)
+                loadImage(it.toString().trim())
+            }
         }
     }
+
+    private fun loadImage(url: String) {
+        Glide.with(this)
+            .load(url)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .centerCrop()
+            .into(mBinding.imgphoto)
+    }
+
 
     //esta funcion ejecuta una consulta a la base de datos para obtener los datos de la tienda
     private fun getStore(id: Long) {
@@ -91,7 +114,12 @@ class EditStoreFragment : Fragment() {
                 true
             }
             R.id.action_save -> {
-                if (mStoreEntity != null && validateFields()) {
+                if (mStoreEntity != null && validateFields(
+                        mBinding.tilPhotoUrl,
+                        mBinding.tilPhone,
+                        mBinding.tilName
+                    )
+                ) {
                     with(mStoreEntity!!) {
                         name = mBinding.etName.text.toString().trim()
                         phone = mBinding.etPhone.text.toString().trim()
@@ -100,24 +128,32 @@ class EditStoreFragment : Fragment() {
                     }
 
                     doAsync {
-                        if (mIsEditMode)StoreApplication.database.storeDao().updateStore(mStoreEntity!!)
-                        else mStoreEntity?.id = StoreApplication.database.storeDao().addStore(mStoreEntity!!)
+                        if (mIsEditMode) StoreApplication.database.storeDao()
+                            .updateStore(mStoreEntity!!)
+                        else mStoreEntity?.id =
+                            StoreApplication.database.storeDao().addStore(mStoreEntity!!)
 
                         uiThread {
 
                             hidekeyboard()//para que se oculte el teclado
 
-                            if (mIsEditMode){
+                            if (mIsEditMode) {
                                 mActivity?.updateStore(mStoreEntity!!)
 
-                                Snackbar.make( mBinding.root,
+                                Snackbar.make(
+                                    mBinding.root,
                                     getString(R.string.edit_stor_msg_update_succsess),
-                                    Snackbar.LENGTH_SHORT).show()
+                                    Snackbar.LENGTH_SHORT
+                                ).show()
 
-                            }else {
-                                mActivity?.addStore( mStoreEntity!!)
+                            } else {
+                                mActivity?.addStore(mStoreEntity!!)
 //este toast sirve para mostrar un mensaje en la pantalla del usuario cuando se guarda una tienda
-                                Toast.makeText(mActivity, R.string.edit_store_message_save_success, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    mActivity,
+                                    R.string.edit_store_message_save_success,
+                                    Toast.LENGTH_SHORT
+                                ).show()
 
                                 mActivity?.onBackPressed() //para que regrese a la pantalla anterior y no tener que borrar todos los campos
                             }
@@ -129,32 +165,51 @@ class EditStoreFragment : Fragment() {
             else -> super.onOptionsItemSelected(item)
         }
     }
-//funcion de validacion de los campos de la pantalla de edicion de tienda
-    private fun validateFields(): Boolean {
-        var isValid = true
-            if (mBinding.etPhotoUrl.text.toString().trim().isEmpty()) {
-                mBinding.tilPhotoUrl.error = getString(R.string.helper_required)
-                mBinding.etPhotoUrl.requestFocus()//esto es para que haga el foco en este campo
-                isValid = false
-            }
-            if (mBinding.etPhone.text.toString().trim().isEmpty()) {
-                mBinding.tilPhone.error = getString(R.string.helper_required)
-                mBinding.etPhotoUrl.requestFocus()//esto es para que haga el foco en este campo
-                isValid = false
-            }
-            if (mBinding.etName.text.toString().trim().isEmpty()) {
-                mBinding.tilName.error = getString(R.string.helper_required)
-                mBinding.etPhotoUrl.requestFocus()//esto es para que haga el foco en este campo
-                isValid = false
-            }
 
+    //funcion de validacion de los campos de la pantalla de edicion de tienda
+    private fun validateFields(vararg textFields: TextInputLayout): Boolean {
+        var isValid = true
+        for (textField in textFields) {
+            if (textField.editText?.text.toString().trim().isEmpty()) {
+                textField.error = getString(R.string.helper_required)
+                isValid = false
+            } else {
+                textField.error = null
+            }
+            if (!isValid) Snackbar.make(
+                mBinding.root,
+                getString(R.string.edit_store_message_valid),
+                Snackbar.LENGTH_SHORT
+            ).show()
+        }
         return isValid
     }
+
+//    private fun validateFields(): Boolean {
+//        var isValid = true
+//        if (mBinding.etPhotoUrl.text.toString().trim().isEmpty()) {
+//            mBinding.tilPhotoUrl.error = getString(R.string.helper_required)
+//            mBinding.etPhotoUrl.requestFocus()//esto es para que haga el foco en este campo
+//            isValid = false
+//        }
+//        if (mBinding.etPhone.text.toString().trim().isEmpty()) {
+//            mBinding.tilPhone.error = getString(R.string.helper_required)
+//            mBinding.etPhotoUrl.requestFocus()//esto es para que haga el foco en este campo
+//            isValid = false
+//        }
+//        if (mBinding.etName.text.toString().trim().isEmpty()) {
+//            mBinding.tilName.error = getString(R.string.helper_required)
+//            mBinding.etPhotoUrl.requestFocus()//esto es para que haga el foco en este campo
+//            isValid = false
+//        }
+//
+//        return isValid
+//    }
 
 
     private fun hidekeyboard() {
         val imm = mActivity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.hideSoftInputFromWindow(requireView().windowToken, 0)
+        imm.hideSoftInputFromWindow(requireView().windowToken, 0)
     }
 
     override fun onDestroyView() {

@@ -2,8 +2,10 @@ package com.example.storeroom3
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.storeroom3.databinding.ActivityMainBinding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 
@@ -26,7 +28,7 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
 //            mAdapter.add(store)
 //        }
 
-        mBinding.fab.setOnClickListener{launchEditFragment()}
+        mBinding.fab.setOnClickListener { launchEditFragment() }
 
         setupRecyclerView()
 
@@ -44,12 +46,13 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
         fragmentTransaction.addToBackStack(null) //esto hace retroceder el fragmen (OnDestroid) y regresa a la activitiMain
         fragmentTransaction.commit()
 
-       // mBinding.fab.hide() //oculta el fab para que una vez se presione se oculte
+        // mBinding.fab.hide() //oculta el fab para que una vez se presione se oculte
         hideFab()
     }
-//configuracion basica para lanzar un fragment en kotlin
-    private fun setupRecyclerView(){
-        mAdapter = StoreAdapter(mutableListOf(),this)
+
+    //configuracion basica para lanzar un fragment en kotlin
+    private fun setupRecyclerView() {
+        mAdapter = StoreAdapter(mutableListOf(), this)
         mGridLayout = GridLayoutManager(this, 2)
         getStore()
 
@@ -60,7 +63,7 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
         }
     }
 
-    private fun getStore(){
+    private fun getStore() {
         doAsync {
             val store = StoreApplication.database.storeDao().getAllStore()
             uiThread {
@@ -75,7 +78,7 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
     //cuando se presiona un item del recyclerView se lanza el fragment de edicion de store en el containerMain
     override fun onClick(storeId: Long) {
         val args = Bundle()
-        args.putLong(getString(R.string.arg_id),storeId)
+        args.putLong(getString(R.string.arg_id), storeId)
 
         launchEditFragment(args)
     }
@@ -85,19 +88,45 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
         doAsync {
             StoreApplication.database.storeDao().updateStore(storeEntity)
             uiThread {
-                mAdapter.update(storeEntity)
+                updateStore(storeEntity)
             }
         }
     }
 
     override fun onDeleteStore(storeEntity: StoreEntity) {
-        doAsync {
-            StoreApplication.database.storeDao().deleteStore(storeEntity)
-            uiThread {
-                mAdapter.delete(storeEntity)
+        val item = arrayOf("Eliminar", "Llamar", "Ir al sitio web")
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.dialog_options_title)
+            .setItems(item) { dialogInterface, i ->
+                when (i) {
+                    0 -> confirmDelete(storeEntity)
+                    1 -> Toast.makeText(this, "Llamar...", Toast.LENGTH_SHORT).show()
+                    2 -> Toast.makeText(this, "Ir al sitio web...", Toast.LENGTH_SHORT).show()
+                }
             }
-        }
+
+            .show()
     }
+
+    //funsion que se ejecuta cuando se presiona el boton eliminar
+    private fun confirmDelete(storeEntity: StoreEntity) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.dialog_delete_title)
+            .setPositiveButton(R.string.dialog_delete_confirm) { dialogInterface, i ->
+                doAsync {
+                    StoreApplication.database.storeDao().deleteStore(storeEntity)
+                    uiThread {
+                        mAdapter.delete(storeEntity)
+                    }
+                }
+
+            }
+            .setNegativeButton(R.string.dialog_delete_cancel) { dialogInterface, i ->
+                dialogInterface.dismiss()
+            }
+            .show()
+    }//end confirmDelete
 
     /*
     * MainAux
@@ -112,5 +141,5 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
 
     override fun updateStore(storeEntity: StoreEntity) {
         mAdapter.update(storeEntity)
-    }
-}
+    }//end updateStore
+}//end class
