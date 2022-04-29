@@ -66,7 +66,6 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
     private fun setupRecyclerView() {
         mAdapter = StoreAdapter(mutableListOf(), this)
         mGridLayout = GridLayoutManager(this, 2)
-        //getStore()
 
         mBinding.recyclerView.apply {
             setHasFixedSize(true)
@@ -74,19 +73,9 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
             adapter = mAdapter
         }
     }
-
-//    private fun getStore() {
-//        doAsync {
-//            val store = StoreApplication.database.storeDao().getAllStore()
-//            uiThread {
-//                mAdapter.setStore(store)
-//            }
-//        }
-//    }
-
     /*
-        * OnClickListener
-        * */
+     * OnClickListener
+     * */
     //cuando se presiona un item del recyclerView se lanza el fragment de edicion de store en el containerMain
     override fun onClick(storeId: Long) {
         val args = Bundle()
@@ -97,12 +86,7 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
 
     override fun onFavoriteStore(storeEntity: StoreEntity) {
         storeEntity.isFavorite = !storeEntity.isFavorite
-        doAsync {
-            StoreApplication.database.storeDao().updateStore(storeEntity)
-            uiThread {
-                updateStore(storeEntity)
-            }
-        }
+        //TODO: update store 29/4/22
     }
 
     override fun onDeleteStore(storeEntity: StoreEntity) {
@@ -126,12 +110,7 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.dialog_delete_title)
             .setPositiveButton(R.string.dialog_delete_confirm) { _, _ ->
-                doAsync {
-                    StoreApplication.database.storeDao().deleteStore(storeEntity)
-                    uiThread {
-                        mAdapter.delete(storeEntity)
-                    }
-                }
+               // TODO 29/4/22 delete
 
             }
             .setNegativeButton(R.string.dialog_delete_cancel) { dialogInterface, _ ->

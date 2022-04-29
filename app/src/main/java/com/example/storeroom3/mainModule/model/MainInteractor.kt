@@ -11,12 +11,32 @@ class MainInteractor {
         fun getStoresCallback(stores: MutableList<StoreEntity>)
     }
 
-    fun getStoresCallback(callback: StoresCallback) {
+    //esta funcion utiliza unit para que no devuelva nada y no tenga que pasarle nada
+    fun getStores(callback: (MutableList<StoreEntity>) -> Unit) {
         doAsync {
             val storeList = StoreApplication.database.storeDao().getAllStore()
             uiThread {
-                callback.getStoresCallback(storeList)
+                callback(storeList)
             }
         }
     }
+
+    fun deleteStore(storeEntity: StoreEntity, callback: (StoreEntity) -> Unit) {
+        doAsync {
+            StoreApplication.database.storeDao().deleteStore(storeEntity)
+            uiThread {
+                callback(storeEntity)
+            }
+        }
+    }
+
+    fun updateStore(storeEntity: StoreEntity, callback: (StoreEntity) -> Unit) {
+        doAsync {
+            StoreApplication.database.storeDao().updateStore(storeEntity)
+            uiThread {
+                callback(storeEntity)
+            }
+        }
+    }
+
 }
