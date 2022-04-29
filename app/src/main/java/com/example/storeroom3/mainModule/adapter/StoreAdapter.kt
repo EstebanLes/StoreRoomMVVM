@@ -50,8 +50,10 @@ class StoreAdapter(
     }
 
     fun add(storeEntity: StoreEntity) {
-        stores.add(storeEntity)
-        notifyDataSetChanged()
+        if (!stores.contains(storeEntity)) {
+            stores.add(storeEntity)
+            notifyItemInserted(stores.size - 1)
+        }
     }
 
     fun update(storeEntity: StoreEntity) {

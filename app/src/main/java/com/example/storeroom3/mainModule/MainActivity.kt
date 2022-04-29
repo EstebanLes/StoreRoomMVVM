@@ -3,6 +3,7 @@ package com.example.storeroom3.mainModule
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.storeroom3.*
 import com.example.storeroom3.common.utils.MainAux
@@ -11,6 +12,7 @@ import com.example.storeroom3.databinding.ActivityMainBinding
 import com.example.storeroom3.editModule.EditStoreFragment
 import com.example.storeroom3.mainModule.adapter.OnClickListener
 import com.example.storeroom3.mainModule.adapter.StoreAdapter
+import com.example.storeroom3.mainModule.viewModel.MainViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
@@ -22,22 +24,26 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
     private lateinit var mAdapter: StoreAdapter
     private lateinit var mGridLayout: GridLayoutManager
 
+    //MVVM
+    private lateinit var mMainViewModel: MainViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
-//        mBinding.btnSave.setOnClickListener{
-//            val store = StoreEntity(name = mBinding.etName.text.toString().trim())
-//
-//            Thread {StoreApplication.database.storeDao().addStore(store)}.start()
-//            mAdapter.add(store)
-//        }
-
         mBinding.fab.setOnClickListener { launchEditFragment() }
 
+        setupViewModel()
         setupRecyclerView()
 
+    }
+// funcion para inicializar el viewModel y sus observadores de datos en el MainViewModel
+    private fun setupViewModel() {
+        mMainViewModel = ViewModelProvider(this)[MainViewModel::class.java]
+        mMainViewModel.getStores().observe(this) { it
+            mAdapter.setStore(it as MutableList<StoreEntity>)
+        }
     }
 
     private fun launchEditFragment(args: Bundle? = null) {
@@ -60,7 +66,7 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
     private fun setupRecyclerView() {
         mAdapter = StoreAdapter(mutableListOf(), this)
         mGridLayout = GridLayoutManager(this, 2)
-        getStore()
+        //getStore()
 
         mBinding.recyclerView.apply {
             setHasFixedSize(true)
@@ -69,14 +75,14 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
         }
     }
 
-    private fun getStore() {
-        doAsync {
-            val store = StoreApplication.database.storeDao().getAllStore()
-            uiThread {
-                mAdapter.setStore(store)
-            }
-        }
-    }
+//    private fun getStore() {
+//        doAsync {
+//            val store = StoreApplication.database.storeDao().getAllStore()
+//            uiThread {
+//                mAdapter.setStore(store)
+//            }
+//        }
+//    }
 
     /*
         * OnClickListener
