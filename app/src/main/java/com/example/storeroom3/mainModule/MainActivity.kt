@@ -14,8 +14,6 @@ import com.example.storeroom3.mainModule.adapter.OnClickListener
 import com.example.storeroom3.mainModule.adapter.StoreAdapter
 import com.example.storeroom3.mainModule.viewModel.MainViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
 
 class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
 
@@ -85,8 +83,7 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
     }
 
     override fun onFavoriteStore(storeEntity: StoreEntity) {
-        storeEntity.isFavorite = !storeEntity.isFavorite
-        //TODO: update store 29/4/22
+        mMainViewModel.updateStore(storeEntity)
     }
 
     override fun onDeleteStore(storeEntity: StoreEntity) {
@@ -110,7 +107,7 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.dialog_delete_title)
             .setPositiveButton(R.string.dialog_delete_confirm) { _, _ ->
-               // TODO 29/4/22 delete
+               mMainViewModel.deleteStore(storeEntity)
 
             }
             .setNegativeButton(R.string.dialog_delete_cancel) { dialogInterface, _ ->
