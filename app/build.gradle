@@ -39,6 +39,8 @@ android {
 
 def roomVersion = "2.4.2"
 def anko_version = "0.10.8"
+def lifecycle_version = "2.5.0-alpha06"
+
 
 dependencies {
 
@@ -59,6 +61,9 @@ dependencies {
     //Glide
     implementation "com.github.bumptech.glide:glide:4.13.0"
     annotationProcessor 'com.github.bumptech.glide:compiler:4.13.0'
+
+    // ViewModel
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

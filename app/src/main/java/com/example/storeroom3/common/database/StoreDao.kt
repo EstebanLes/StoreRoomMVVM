@@ -1,6 +1,7 @@
-package com.example.storeroom3
+package com.example.storeroom3.common.database
 
 import androidx.room.*
+import com.example.storeroom3.common.entities.StoreEntity
 
 @Dao
 interface StoreDao {

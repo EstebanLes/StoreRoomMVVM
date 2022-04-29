@@ -1,4 +1,4 @@
-package com.example.storeroom3
+package com.example.storeroom3.editModule
 
 import android.content.Context
 import android.os.Bundle
@@ -9,7 +9,11 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.example.storeroom3.R
+import com.example.storeroom3.StoreApplication
+import com.example.storeroom3.common.entities.StoreEntity
 import com.example.storeroom3.databinding.FragmentEditStoreBinding
+import com.example.storeroom3.mainModule.MainActivity
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import org.jetbrains.anko.doAsync

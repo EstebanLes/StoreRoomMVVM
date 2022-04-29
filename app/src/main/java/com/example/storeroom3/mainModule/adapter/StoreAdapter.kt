@@ -1,4 +1,4 @@
-package com.example.storeroom3
+package com.example.storeroom3.mainModule.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -7,11 +7,14 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.example.storeroom3.R
+import com.example.storeroom3.common.entities.StoreEntity
 import com.example.storeroom3.databinding.ItemStoreBinding
 
 class StoreAdapter(
     private var stores: MutableList<StoreEntity>,
-    private var listener: OnClickListener): RecyclerView.Adapter<StoreAdapter.ViewHolder>() {
+    private var listener: OnClickListener
+): RecyclerView.Adapter<StoreAdapter.ViewHolder>() {
 
     private lateinit var mContext: Context
 

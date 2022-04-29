@@ -1,10 +1,16 @@
-package com.example.storeroom3
+package com.example.storeroom3.mainModule
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.recyclerview.widget.GridLayoutManager
+import com.example.storeroom3.*
+import com.example.storeroom3.common.utils.MainAux
+import com.example.storeroom3.common.entities.StoreEntity
 import com.example.storeroom3.databinding.ActivityMainBinding
+import com.example.storeroom3.editModule.EditStoreFragment
+import com.example.storeroom3.mainModule.adapter.OnClickListener
+import com.example.storeroom3.mainModule.adapter.StoreAdapter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
@@ -98,7 +104,7 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
 
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.dialog_options_title)
-            .setItems(item) { dialogInterface, i ->
+            .setItems(item) { _, i ->
                 when (i) {
                     0 -> confirmDelete(storeEntity)
                     1 -> Toast.makeText(this, "Llamar...", Toast.LENGTH_SHORT).show()
@@ -113,7 +119,7 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
     private fun confirmDelete(storeEntity: StoreEntity) {
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.dialog_delete_title)
-            .setPositiveButton(R.string.dialog_delete_confirm) { dialogInterface, i ->
+            .setPositiveButton(R.string.dialog_delete_confirm) { _, _ ->
                 doAsync {
                     StoreApplication.database.storeDao().deleteStore(storeEntity)
                     uiThread {
@@ -122,7 +128,7 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
                 }
 
             }
-            .setNegativeButton(R.string.dialog_delete_cancel) { dialogInterface, i ->
+            .setNegativeButton(R.string.dialog_delete_cancel) { dialogInterface, _ ->
                 dialogInterface.dismiss()
             }
             .show()
